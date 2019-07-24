@@ -102,7 +102,7 @@ class StockExchange:
             trader_names.append(trader.get_name())
         pyplot.legend(trader_names)
         pyplot.show()
-
+        #pyplot.save() <- check if needed
 
 # This main method evaluates all traders over the testing period and visualize the results.
 if __name__ == "__main__":
