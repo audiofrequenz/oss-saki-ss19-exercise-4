@@ -1,7 +1,7 @@
 from framework.portfolio import Portfolio
 from framework.stock_data import StockData
 from framework.vote import Vote
-
+import numpy as np
 
 class State:
     portfolio: Portfolio
@@ -22,8 +22,26 @@ class State:
         self.current_stock_data_b = current_stock_data_b
         #self.previous_stock_data_b = previous_stock_data_b
 
+    def get_nn_input_state(self):
+        voteA = 0
+        voteB = 0
+        if self.expert_vote_stock_a == Vote.BUY:
+            voteA = 1
+        elif self.expert_vote_stock_a == Vote.HOLD:
+            voteA = 2
+        else:
+            voteA = 3
+        if self.expert_vote_stock_b == Vote.BUY:
+            voteB = 1
+        elif self.expert_vote_stock_b == Vote.HOLD:
+            voteB = 2
+        else:
+            voteB = 3
+        return np.array([[voteA, voteB]])
+        #return np.array([[expert vote a, expert vote b]])
     def get_nn_input_param(self):
-        param = []#np.zeros(9)
+        param = np.zeros(2)
+        param = np.zeros(9)
         if self.expert_vote_stock_a == Vote.BUY:
             param[0] = 1
         elif self.expert_vote_stock_a == Vote.HOLD:

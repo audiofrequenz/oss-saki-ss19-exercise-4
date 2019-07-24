@@ -84,6 +84,37 @@ class DeepQLearningTrader(ITrader):
         save_keras_sequential(self.model, self.RELATIVE_DATA_DIRECTORY, self.get_name())
         logger.info(f"DQL Trader: Saved trained model")
 
+    def gen_reward(self, portfolio: Portfolio):
+        print('gen_reward')
+        current_portfolio_value = portfolio.cash
+        if self.last_portfolio_value < current_portfolio_value:
+            return 10*(current_portfolio_value/self.last_portfolio_value)
+        elif self.last_portfolio_value > current_portfolio_value:
+            return -10
+        else:
+            return -1
+        # get last portfolio value
+        # get current portfolio value
+        # if last < current reward*(aktueller wert / last portfoliowert)
+        # if current > last -reward
+        # else ....wollen uns verbessern also - irgendwas
+
+
+    def update_memory(self):
+        # store following objects
+        # memoy last_state, last_action, rward, current_state
+        # self memory append
+        print('update_memory')
+
+    def train_model(self):
+        #wenn aktuelle memory größer der min_size_of_memory_before_training + batchsize
+            #hole dir random  self.memory in größe von batchsize
+            #für jede random memory hole dir max Q(reward + discount * np.amax(self.model.predict(current_state)[0])
+            #lerne das gleiche für den alten state
+            #speichere neues q in q vector vom alten state und der letzten action
+            #train model with self.model.fit(data vorher erzeugt)
+        print('model trained')
+
     def trade(self, portfolio: Portfolio, stock_market_data: StockMarketData) -> List[Order]:
         """
         Generate action to be taken on the "stock market"
@@ -101,8 +132,19 @@ class DeepQLearningTrader(ITrader):
 
         # TODO Compute the current state portfolio: Portfolio, expert_vote_stock_a: Vote, expert_vote_stock_b: Vote, current_stock_data_a: StockData, current_stock_data_b: StockData
         state = State(portfolio, self.expert_a.vote(stock_market_data[Company.A]), self.expert_b.vote(stock_market_data[Company.B]), stock_market_data[Company.A], stock_market_data[Company.B])
-        param = state.get_nn_input_param()
-        y = self.model.predict([param])
+        param = state.get_nn_input_state()
+        if self.train_while_trading and self.last_state is not None:
+            current_reward = self.gen_reward(portfolio)
+            self.update_memory()
+
+            #1.define reward
+            #2.define(append) memory
+            #3.train model
+
+        #generate action index
+        #store old state and old action
+        #return order list which contains order_list.append(Order(OrderType.BUY, Company.A, amount_to_buy_a))
+        #y = self.model.predict(param)
         # TODO Store state as experience (memory) and train the neural network only if trade() was called before at least once
 
         # TODO Create actions for current state and decrease epsilon for fewer random actions
