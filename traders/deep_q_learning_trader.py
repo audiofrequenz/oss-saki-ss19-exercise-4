@@ -47,7 +47,7 @@ class DeepQLearningTrader(ITrader):
         self.state_size = 2
         self.action_size = 10
         self.hidden_size = 50
-
+        self.discount = 0.9
         # Parameters for deep Q-learning
         self.learning_rate = 0.001
         self.epsilon = 1.0
@@ -100,20 +100,28 @@ class DeepQLearningTrader(ITrader):
         # else ....wollen uns verbessern also - irgendwas
 
 
-    def update_memory(self):
+    def update_memory(self, reward, current_state_param):
+        print('update_memory')
+        current_memory_state = (self.last_state, self.last_action, reward, current_state_param)
+        self.memory.append(current_memory_state)
         # store following objects
         # memoy last_state, last_action, rward, current_state
         # self memory append
-        print('update_memory')
 
-    def train_model(self):
+    def train_model(self, reward, current_state_param):
+        if self.memory.len() > self.min_size_of_memory_before_training + self.batch_size:
+            rand_memories = random.sample(self.memory, self.batch_size)
+            for mem in rand_memories:
+                q_val_curr = reward + self.discount * np.amax(self.model.predict(current_state_param[0]))
+                q_val_prev = reward + self.discount * np.amax(self.model.predict(self.last_state[0]))
         #wenn aktuelle memory größer der min_size_of_memory_before_training + batchsize
             #hole dir random  self.memory in größe von batchsize
-            #für jede random memory hole dir max Q(reward + discount * np.amax(self.model.predict(current_state)[0])
+            #für jede random memory hole dir max Q(reward + discount * np.amax(self.model.predict(current_state)[0]) new_q = reward + self.discount * np.amax(self.model.predict(current_state)[0])
             #lerne das gleiche für den alten state
             #speichere neues q in q vector vom alten state und der letzten action
             #train model with self.model.fit(data vorher erzeugt)
         print('model trained')
+
 
     def trade(self, portfolio: Portfolio, stock_market_data: StockMarketData) -> List[Order]:
         """
@@ -135,8 +143,8 @@ class DeepQLearningTrader(ITrader):
         param = state.get_nn_input_state()
         if self.train_while_trading and self.last_state is not None:
             current_reward = self.gen_reward(portfolio)
-            self.update_memory()
-
+            self.update_memory(current_reward, param)
+            self.train_model(current_reward, param)
             #1.define reward
             #2.define(append) memory
             #3.train model
