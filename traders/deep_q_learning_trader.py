@@ -123,7 +123,7 @@ class DeepQLearningTrader(ITrader):
         self.last_state = None
         self.last_action = None
         self.last_portfolio_value = None
-        self.reward_factor = 10
+        self.reward_factor = 100
         # Create main model, either as trained model (from file) or as untrained model (from scratch)
         self.model = None
         if load_trained_model:
@@ -227,7 +227,7 @@ class DeepQLearningTrader(ITrader):
 
 
 # This method retrains the traders from scratch using training data from TRAINING and test data from TESTING
-EPISODES = 5
+EPISODES = 2
 if __name__ == "__main__":
     # Create the training data and testing data
     # Hint: You can crop the training data with training_data.deepcopy_first_n_items(n)
